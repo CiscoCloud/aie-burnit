@@ -1,0 +1,25 @@
+image: golang:1.5
+git:
+  path: github.com/danielkrainas/aie-burnit
+script:
+  - echo "build commands"
+  - .shipped/build
+  - .shipped/test
+clone:
+  path: github.com/danielkrainas/aie-burnit
+build:
+  image: golang:1.5
+  commands:
+    - echo "build commands"
+    - .shipped/build
+    - .shipped/test
+publish:
+  docker:
+    file: ./Dockerfile
+    username: $$docker_user
+    password: $$docker_key
+    registry: $$docker_registry
+    repo: $$docker_repo
+    email: $$docker_user_email
+    tag: $$COMMIT
+    
