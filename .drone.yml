@@ -3,16 +3,16 @@ git:
   path: github.com/danielkrainas/aie-burnit
 script:
   - echo "build commands"
-  - .shipped/build
-  - .shipped/test
+  - echo "no build command"
+  - echo "no test command"
 clone:
   path: github.com/danielkrainas/aie-burnit
 build:
   image: golang:1.5
   commands:
     - echo "build commands"
-    - .shipped/build
-    - .shipped/test
+    - echo "no build command"
+    - echo "no test command"
 publish:
   docker:
     file: ./Dockerfile
