@@ -17,7 +17,7 @@ func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	nm.Lock()
 	defer nm.Unlock()
 
-	if r.Method == http.MethodPost {
+	if r.Method == "POST" {
 		alerts++
 		w.WriteHeader(http.StatusOK)
 	} else {
