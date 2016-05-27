@@ -11,12 +11,19 @@ import (
 var nm sync.Mutex
 var N int = 0
 var delta int = 524288 // 512kb
+var alerts = 0
 
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
 	nm.Lock()
 	defer nm.Unlock()
-	fmt.Fprintf(w, `<head><meta http-equiv="refresh" content="2"></head><body>`)
-	fmt.Fprintf(w, "<h1>hello from burnit: %.2f MB</h1>\n</body>", float32(N)/1048576.0)
+
+	if r.Method == http.MethodPost {
+		alerts++
+		w.WriteHeader(http.StatusOK)
+	} else {
+		fmt.Fprintf(w, `<head><meta http-equiv="refresh" content="2"></head><body>`)
+		fmt.Fprintf(w, "<h1>hello from burnit: %.2f MB and %d notifications</h1>\n</body>", float32(N)/1048576.0, alerts)
+	}
 }
 
 func main() {
