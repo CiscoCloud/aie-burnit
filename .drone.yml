@@ -16,6 +16,7 @@ build:
 publish:
   docker:
     file: ./Dockerfile
+    insecure: true
     username: $$docker_user
     password: $$docker_key
     registry: $$docker_registry
