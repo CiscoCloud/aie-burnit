@@ -1,0 +1,4 @@
+export const SELECT_INSTANCE = 'SELECT_INSTANCE';
+export const SET_INSTANCES = 'SET_INSTANCES';
+export const RESET_MEMORY = 'RESET_MEMORY';
+export const UPDATE_SERVER = 'UPDATE_SERVER';

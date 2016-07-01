@@ -1,0 +1,13 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/MustWin/gomarathon",
+			"repository": "https://github.com/MustWin/gomarathon",
+			"vcs": "git",
+			"revision": "ca82367c1f266bf26d13ede70564a25b1707c536",
+			"branch": "master",
+			"notests": true
+		}
+	]
+}
