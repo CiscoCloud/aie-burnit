@@ -1,4 +1,4 @@
-import { SET_INSTANCES, RESET_MEMORY } from './states';
+import { SET_INSTANCES, SELECT_INSTANCE } from './states';
 import _ from 'lodash';
 
 export default reducer = (state, action) => {

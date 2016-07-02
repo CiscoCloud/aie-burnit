@@ -19,6 +19,11 @@ func (c *mockClient) GetApp(appID string) (*gomarathon.Application, error) {
 				Host:  "localhost",
 				Ports: []int{8888},
 			},
+			&gomarathon.Task{
+				AppID: appID,
+				Host:  "localhost",
+				Ports: []int{8888},
+			},
 		},
 		Mem: 512.0,
 	}, nil
