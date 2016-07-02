@@ -1,18 +1,14 @@
-image: golang:1.5
+image: golang:1.6
 git:
   path: github.com/danielkrainas/aie-burnit
 script:
-  - echo "build commands"
-  - echo "no build command"
-  - echo "no test command"
+  - echo "notta 1"
 clone:
   path: github.com/danielkrainas/aie-burnit
 build:
-  image: golang:1.5
+  image: golang:1.6
   commands:
-    - echo "build commands"
-    - echo "no build command"
-    - echo "no test command"
+    - echo "notta"
 publish:
   docker:
     file: ./Dockerfile
