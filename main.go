@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -20,10 +21,21 @@ import (
 func init() {
 	rand.Seed(time.Now().UnixNano())
 	instanceName = names.Generate()
-	MARATHON_APP_ID = os.Getenv("SERVICE_NAME")
+	serviceName := os.Getenv("SERVICE_NAME")
+	if serviceName != "" {
+		hostVarName := strings.ToUpper(serviceName)
+		hostVarName = "HOST_" + strings.Replace(hostVarName, "-", "_", 0)
+		u, err := url.Parse(os.Getenv(hostVarName))
+		if err == nil {
+			MARATHON_APP_ID = strings.Split(u.Host, ".")[0]
+		}
+	}
+
 	if MARATHON_APP_ID == "" {
 		MARATHON_APP_ID = LOCAL_APP_ID
 	}
+
+	fmt.Printf("app=%s\n", MARATHON_APP_ID)
 }
 
 const (
