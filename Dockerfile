@@ -9,5 +9,5 @@ RUN . /root/.bashrc && nvm install v5.0 && nvm use v5.0 && npm install -g grunt-
 RUN chmod a+x .shipped/build .shipped/run .shipped/test
 
 RUN . /root/.bashrc && .shipped/build
-RUN rm -rf node_modules client marathon handlers resources vendor names *.*
+#RUN rm -rf node_modules client marathon handlers resources vendor names *.*
 CMD .shipped/run
