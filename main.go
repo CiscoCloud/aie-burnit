@@ -174,7 +174,7 @@ func determineAppId() {
 		hostVarName := strings.ToUpper(serviceName)
 		hostVarName = "HOST_" + strings.Replace(hostVarName, "-", "_", -1)
 		if os.Getenv(hostVarName) == "" {
-			MARATHON_APP_ID == serviceName
+			MARATHON_APP_ID = serviceName
 		} else {
 			u, err := url.Parse(os.Getenv(hostVarName))
 			if err == nil {
