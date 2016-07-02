@@ -1,6 +1,6 @@
 import request from 'browser-request';
 import _ from 'lodash';
-import { resetMemory, updateServer } from '../store/action-creators';
+import { resetMemory, setResource } from '../store/action-creators';
 
 <memorycontrol>
 	<form onsubmit={ sendUpdate }>
@@ -19,10 +19,10 @@ import { resetMemory, updateServer } from '../store/action-creators';
 
 	<script>
 		this.mixin('redux');
-		this.dispatchify({ resetMemory, updateServer });
+		this.dispatchify({ resetMemory, setResource });
 
 		this.sendUpdate = (e) => {
-			this.updateServer('memory', this.usage.value);
+			this.setResource('memory', this.usage.value);
 			e.preventDefault();
 			return false;
 		};

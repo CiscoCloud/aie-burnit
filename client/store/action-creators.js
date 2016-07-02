@@ -1,4 +1,4 @@
-import { SET_INSTANCES, UPDATE_SERVER, SELECT_INSTANCE, RESET_MEMORY } from './states';
+import { SET_INSTANCES, SET_RESOURCE, SELECT_INSTANCE, RESET_MEMORY } from './states';
 import _ from 'lodash';
 
 export function setInstances(instances) {
@@ -26,9 +26,9 @@ export function resetMemory() {
 	};
 }
 
-export function updateResource(resource, value) {
+export function setResource(resource, value) {
 	return {
-		type: UPDATE_RESOURCE,
+		type: SET_RESOURCE,
 		remote: true,
 		params: {
 			resource: resource,
