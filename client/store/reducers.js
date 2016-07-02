@@ -31,4 +31,10 @@ function updateSelection(state) {
 		state.instances[0].selected = true;
 		state.selected = _.clone(state.instances[0]);
 	}
+
+	state.instances.forEach(i => {
+		if (!state.selected || state.selected.name !== i.name) {
+			i.selected = false;
+		}
+	});
 }
