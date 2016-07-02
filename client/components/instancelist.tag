@@ -2,8 +2,8 @@ import _ from 'lodash';
 import { selectInstance } from '../store/action-creators';
 
 <instancelist>
-	<div class="list-group" each={ instances }>
-		<a role="button" onclick={ select } class={ list-group-item: true, active: selected }>{ name } <span class="badge">RAM { memoryUsage }%</span></a>
+	<div class="list-group">
+		<a role="button" each={ instances } onclick={ select } class={ list-group-item: true, active: selected }>{ name } <span class="badge">RAM { memoryUsage }%</span></a>
 	</div>
 
 	<script>

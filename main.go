@@ -170,15 +170,17 @@ func determineAppId() {
 	instanceName = names.Generate()
 	serviceName := os.Getenv("SERVICE_NAME")
 	if serviceName != "" {
-		/*fmt.Printf("svc name=%q\n", serviceName)
+		fmt.Printf("svc name=%q\n", serviceName)
 		hostVarName := strings.ToUpper(serviceName)
 		hostVarName = "HOST_" + strings.Replace(hostVarName, "-", "_", -1)
-		fmt.Printf("reading %s\n", hostVarName)
-		u, err := url.Parse(os.Getenv(hostVarName))
-		if err == nil {
-			MARATHON_APP_ID = strings.Split(u.Host, ".")[0]
-		}*/
-		MARATHON_APP_ID = serviceName
+		if os.Getenv(hostVarName) == "" {
+			MARATHON_APP_ID == serviceName
+		} else {
+			u, err := url.Parse(os.Getenv(hostVarName))
+			if err == nil {
+				MARATHON_APP_ID = strings.Split(u.Host, ".")[0]
+			}
+		}
 	} else {
 		fmt.Println("SERVICE_NAME not found")
 	}
