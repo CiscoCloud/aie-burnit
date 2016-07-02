@@ -20,22 +20,6 @@ import (
 
 func init() {
 	rand.Seed(time.Now().UnixNano())
-	instanceName = names.Generate()
-	serviceName := os.Getenv("SERVICE_NAME")
-	if serviceName != "" {
-		hostVarName := strings.ToUpper(serviceName)
-		hostVarName = "HOST_" + strings.Replace(hostVarName, "-", "_", 0)
-		u, err := url.Parse(os.Getenv(hostVarName))
-		if err == nil {
-			MARATHON_APP_ID = strings.Split(u.Host, ".")[0]
-		}
-	}
-
-	if MARATHON_APP_ID == "" {
-		MARATHON_APP_ID = LOCAL_APP_ID
-	}
-
-	fmt.Printf("app=%s\n", MARATHON_APP_ID)
 }
 
 const (
@@ -182,7 +166,30 @@ func getStatus(host string, port int) (string, error) {
 	return "", err
 }
 
-func main() {
+func determineAppId() {
+	instanceName = names.Generate()
+	serviceName := os.Getenv("SERVICE_NAME")
+	if serviceName != "" {
+		fmt.Printf("svc name=%q\n", serviceName)
+		hostVarName := strings.ToUpper(serviceName)
+		hostVarName = "HOST_" + strings.Replace(hostVarName, "-", "_", -1)
+		fmt.Printf("reading %s\n", hostVarName)
+		u, err := url.Parse(os.Getenv(hostVarName))
+		if err == nil {
+			MARATHON_APP_ID = strings.Split(u.Host, ".")[0]
+		}
+	} else {
+		fmt.Println("SERVICE_NAME not found")
+	}
+
+	if MARATHON_APP_ID == "" {
+		MARATHON_APP_ID = LOCAL_APP_ID
+	}
+
+	fmt.Printf("app=%s\n", MARATHON_APP_ID)
+}
+
+func setupMarathon() {
 	var err error
 	if os.Getenv("MOCK") != "" {
 		fmt.Println("mocks enabled")
@@ -195,7 +202,11 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
+}
 
+func main() {
+	determineAppId()
+	setupMarathon()
 	app, err := marathonClient.GetApp(MARATHON_APP_ID)
 	if err != nil {
 		panic(err)
