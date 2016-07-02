@@ -4,13 +4,9 @@ import _ from 'lodash';
 export default reducer = (state, action) => {
 	state = _.cloneDeep(state);
 	if (action.type === SET_INSTANCES) {
-		state = _.merge(state, {
-			instances: action.instances
-		});
+		state.instances = action.instances;
 	} else if (action.type === SELECT_INSTANCE) {
-		state = _.merge(state, {
-			selected: action.instance
-		});
+		state.selected = action.instance;
 	}
 
 	updateSelection(state);
