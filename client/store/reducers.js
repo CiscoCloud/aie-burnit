@@ -1,5 +1,6 @@
-import { SET_INSTANCES, SELECT_INSTANCE } from './states';
 import _ from 'lodash';
+
+import { SET_INSTANCES, SELECT_INSTANCE } from './states';
 
 export default reducer = (state, action) => {
 	state = _.cloneDeep(state);

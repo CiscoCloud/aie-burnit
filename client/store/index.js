@@ -9,6 +9,6 @@ const defaultState = {
 	selected: null
 };
 
-export default function storeFactory(middlewares) {
+export default function storeFactory(...middlewares) {
 	return createStore(reducer, defaultState, applyMiddleware(...middlewares));
 }

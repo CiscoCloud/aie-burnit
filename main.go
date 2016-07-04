@@ -120,7 +120,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, fmt.Sprintf(`{
 		"name": %q,
 		"host": %q,
-		"memory_usage": "%.2f"
+		"memory_usage": "%.1f"
 	}`, instanceName, r.Host, resources.GetMemoryUsage()))
 }
 

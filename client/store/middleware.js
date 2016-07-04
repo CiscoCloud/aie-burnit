@@ -21,9 +21,3 @@ export const remoteRelay = updater => store => next => action => {
 
 	return next(action);
 };
-
-export const refresher = checker => store => next => action => {
-	if (action.remote) {
-
-	}
-};
