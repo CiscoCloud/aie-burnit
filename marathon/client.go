@@ -2,21 +2,59 @@ package marathon
 
 import (
 	"crypto/tls"
-	"time"
+	"fmt"
 
 	"github.com/MustWin/gomarathon"
 )
-
-const CACHE_TIMEOUT int64 = 20000
 
 type Client interface {
 	GetApp(appID string) (*gomarathon.Application, error)
 }
 
+type Task struct {
+	Alive       bool
+	HostAddress string
+}
+
+type App struct {
+	ID    string
+	Tasks []*Task
+}
+
+func makeApp(app *gomarathon.Application) *App {
+	tasks := make([]*Task, 0)
+	a := &App{
+		ID: app.ID,
+	}
+
+	for _, t := range app.Tasks {
+		tasks = append(tasks, makeTask(t))
+	}
+
+	a.Tasks = tasks
+	return a
+}
+
+func makeTask(task *gomarathon.Task) *Task {
+	t := &Task{
+		Alive: true,
+	}
+
+	if len(task.HealthCheckResults) > 0 {
+		t.Alive = task.HealthCheckResults[0].Alive
+	}
+
+	port := 80
+	if len(task.Ports) > 0 {
+		port = task.Ports[0]
+	}
+
+	t.HostAddress = fmt.Sprintf("%s:%d", task.Host, port)
+	return t
+}
+
 type marathonClient struct {
 	*gomarathon.Client
-	lastResult *gomarathon.Application
-	lastLookup int64
 }
 
 func NewClient() (Client, error) {
@@ -36,17 +74,11 @@ func NewClient() (Client, error) {
 	}, nil
 }
 
-func (c *marathonClient) GetApp(appID string) (*gomarathon.Application, error) {
-	if c.lastResult != nil && time.Now().Unix() <= (CACHE_TIMEOUT+c.lastLookup) {
-		return c.lastResult, nil
-	}
-
-	c.lastLookup = time.Now().Unix()
+func (c *marathonClient) GetApp(appID string) (*App, error) {
 	r, err := c.Client.GetApp(appID)
 	if err != nil {
 		return nil, err
 	}
 
-	c.lastResult = r.App
-	return r.App, nil
+	return makeApp(r.App), nil
 }

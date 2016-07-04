@@ -150,24 +150,20 @@ func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, fmt.Sprintf("[%s]", strings.Join(results, ",")))
 }
 
-func getStatus(t *gomarathon.Task) string {
-	hostname := fmt.Sprintf("%s:%d", t.Host, t.Ports[0])
-	if len(t.HealthCheckResults) > 0 {
-		hc := t.HealthCheckResults[0]
-		if !hc.Alive {
-			return getErrorStatus(hostname, "dead", "invalid healthcheck")
-		}
+func getStatus(t *marathon.Task) string {
+	if !t.Alive {
+		return getErrorStatus(hostname, "dead", "invalid healthcheck")
 	}
 
-	resp, err := http.Get(fmt.Sprintf("http://%s/status", hostname))
+	resp, err := http.Get(fmt.Sprintf("http://%s/status", t.HostAddress))
 	if err != nil {
-		return getErrorStatus(hostname, "quiet", "could not connect")
+		return getErrorStatus(t.HostAddress, "quiet", "could not connect")
 	}
 
 	defer resp.Body.Close()
 	s, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return getErrorStatus(hostname, "confused", "invalid response")
+		return getErrorStatus(t.HostAddress, "confused", "invalid response")
 	}
 
 	return string(s)
