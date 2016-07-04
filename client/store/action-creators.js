@@ -2,7 +2,7 @@ import { SET_INSTANCES, SET_RESOURCE, SELECT_INSTANCE, RESET_MEMORY } from './st
 import _ from 'lodash';
 
 export function setInstances(instances) {
-	console.info(instances);
+	instances = instances || [];
 	return {
 		type: SET_INSTANCES,
 		instances: _.sortBy(instances.map(i => {

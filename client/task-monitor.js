@@ -1,22 +1,25 @@
 import request from 'browser-request';
 import { setInstances } from './store/action-creators';
 
-export default class StatusChecker {
-	constructor(store) {
+export default class TaskMonitor {
+	constructor() {
 		this.timeoutId = null;
+	}
+
+	init(store) {
 		this.store = store;
 	}
 
 	start() {
+		this.update();
+	}
+
+	update() {
 		if (this.timeoutId) {
 			clearTimeout(this.timeoutId);
 			this.timeoutId = null;
 		}
 
-		this.update();
-	}
-
-	update() {
 		request({
 			method: 'GET',
 			url: '/status/all',

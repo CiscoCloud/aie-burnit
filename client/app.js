@@ -5,12 +5,16 @@ import './components/instancelist.tag';
 import './components/memorycontrol.tag';
 import './components/instancecontrols.tag';
 
-import store from './store';
+import storeFactory from './store';
 import { setInstances } from './store/action-creators';
-import StatusChecker from './status-check';
+import TaskMonitor from './task-monitor';
+import * as wares from './store/middleware';
 
-var statusCheck = new StatusChecker(store);
-statusCheck.start();
+var taskMonitor = new TaskMonitor();
+var store = storeFactory(wares.logging, wares.remoteRelay(() => taskMonitor.update()));
+
+taskMonitor.init(store);
+taskMonitor.start();
 
 riot.mixin('redux', reduxMixin(store));
 riot.mount('*', {});

@@ -9,5 +9,6 @@ const defaultState = {
 	selected: null
 };
 
-var middleware = applyMiddleware(wares.logging, wares.relay);
-export default createStore(reducer, defaultState, middleware);
+export default function storeFactory(middlewares) {
+	return createStore(reducer, defaultState, applyMiddleware(...middlewares));
+}

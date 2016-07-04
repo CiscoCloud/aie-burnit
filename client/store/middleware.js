@@ -6,7 +6,7 @@ export const logging = store => next => action => {
     return next(action);
 };
 
-export const relay = store => next => action => {
+export const remoteRelay = updater => store => next => action => {
 	if (action.remote) {
 		var req = action.params;
 		req.host = req.host || store.getState().selected.host;
@@ -14,8 +14,16 @@ export const relay = store => next => action => {
 			method: 'POST',
 			url: '/update',
 			json: req
-		}, _.noop);		
+		}, () => {
+			updater.update();
+		});
 	}
 
 	return next(action);
+};
+
+export const refresher = checker => store => next => action => {
+	if (action.remote) {
+
+	}
 };
