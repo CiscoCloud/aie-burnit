@@ -2,3 +2,4 @@ export const SELECT_INSTANCE = 'SELECT_INSTANCE';
 export const SET_INSTANCES = 'SET_INSTANCES';
 export const RESET_MEMORY = 'RESET_MEMORY';
 export const SET_RESOURCE = 'SET_RESOURCE';
+export const NEXT_INSTANCE = 'NEXT_INSTANCE';

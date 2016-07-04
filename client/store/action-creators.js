@@ -1,4 +1,4 @@
-import { SET_INSTANCES, SET_RESOURCE, SELECT_INSTANCE, RESET_MEMORY } from './states';
+import { SET_INSTANCES, SET_RESOURCE, SELECT_INSTANCE, RESET_MEMORY, NEXT_INSTANCE } from './states';
 import _ from 'lodash';
 
 export function setInstances(instances) {
@@ -41,5 +41,11 @@ export function selectInstance(instance) {
 	return {
 		type: SELECT_INSTANCE,
 		instance: instance
+	};
+}
+
+export function nextInstance() {
+	return {
+		type: NEXT_INSTANCE
 	};
 }

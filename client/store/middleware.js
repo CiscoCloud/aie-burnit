@@ -6,7 +6,7 @@ export const logging = store => next => action => {
     return next(action);
 };
 
-export const remoteRelay = updater => store => next => action => {
+export const remoteRelay = afterUpdate => store => next => action => {
 	if (action.remote) {
 		var req = action.params;
 		req.host = req.host || store.getState().selected.host;
@@ -15,7 +15,7 @@ export const remoteRelay = updater => store => next => action => {
 			url: '/update',
 			json: req
 		}, () => {
-			updater.update();
+			afterUpdate();
 		});
 	}
 
