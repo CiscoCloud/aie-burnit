@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/MustWin/gomarathon"
 	"github.com/danielkrainas/aie-burnit/marathon"
 	"github.com/danielkrainas/aie-burnit/names"
 	"github.com/danielkrainas/aie-burnit/resources"
@@ -141,33 +142,39 @@ func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	results := make([]string, 0)
 	for _, t := range app.Tasks {
-		status, err := getStatus(t.Host, t.Ports[0])
-		if err == nil {
-			results = append(results, string(status))
-		}
+		status := getStatus(t)
+		results = append(results, string(status))
 	}
 
 	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, fmt.Sprintf("[%s]", strings.Join(results, ",")))
 }
 
-func getStatus(host string, port int) (string, error) {
-	resp, err := http.Get(fmt.Sprintf("http://%s:%d/status", host, port))
+func getStatus(t *gomarathon.Task) string {
+	hostname := fmt.Sprintf("%s:%d", t.Host, t.Ports[0])
+	if len(t.HealthCheckResults) > 0 {
+		hc := t.HealthCheckResults[0]
+		if !hc.Alive {
+			return getErrorStatus(hostname, "dead", "invalid healthcheck")
+		}
+	}
+
+	resp, err := http.Get(fmt.Sprintf("http://%s/status", hostname))
 	if err != nil {
-		return getErrorstatus(host, port), err
+		return getErrorStatus(hostname, "quiet", "could not connect")
 	}
 
 	defer resp.Body.Close()
 	s, err := ioutil.ReadAll(resp.Body)
-	if err == nil {
-		return string(s), nil
+	if err != nil {
+		return getErrorStatus(hostname, "confused", "invalid response")
 	}
 
-	return "", err
+	return string(s)
 }
 
-func getErrorstatus(host string, port int) string {
-	return fmt.Sprintf(`{"name":"(unknown)", "host":"{0}:{1}", "invalid": ""}`, host, port)
+func getErrorStatus(hostname string, status string, message string) string {
+	return fmt.Sprintf(`{"name":"(unknown)", "host":%q, "status":{"name":%q,message:%q}}`, hostname, status, message)
 }
 
 func determineAppId() {
