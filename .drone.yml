@@ -9,7 +9,7 @@ build:
   image: dakr/golangnode
   commands:
     - npm install
-    - grunt build
+    - bash -c "grunt build"
     - .shipped/build
 publish:
   docker:
