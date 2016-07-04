@@ -22,7 +22,7 @@ func (c *mockClient) GetApp(appID string) (*gomarathon.Application, error) {
 			&gomarathon.Task{
 				AppID: appID,
 				Host:  "localhost",
-				Ports: []int{8888},
+				Ports: []int{8887},
 			},
 		},
 		Mem: 512.0,
