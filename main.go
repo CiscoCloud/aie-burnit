@@ -154,7 +154,7 @@ func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
 func getStatus(host string, port int) (string, error) {
 	resp, err := http.Get(fmt.Sprintf("http://%s:%d/status", host, port))
 	if err != nil {
-		return "", err
+		return getErrorstatus(host, port), err
 	}
 
 	defer resp.Body.Close()
@@ -164,6 +164,10 @@ func getStatus(host string, port int) (string, error) {
 	}
 
 	return "", err
+}
+
+func getErrorstatus(host string, port int) string {
+	return fmt.Sprintf(`{"name":"(unknown)", "host":"{0}:{1}", "invalid": ""}`, host, port)
 }
 
 func determineAppId() {
