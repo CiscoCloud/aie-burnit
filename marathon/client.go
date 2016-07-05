@@ -8,7 +8,7 @@ import (
 )
 
 type Client interface {
-	GetApp(appID string) (*gomarathon.Application, error)
+	GetApp(appID string) (*App, error)
 }
 
 type Task struct {
@@ -17,14 +17,16 @@ type Task struct {
 }
 
 type App struct {
-	ID    string
-	Tasks []*Task
+	ID     string
+	Tasks  []*Task
+	Memory float32
 }
 
 func makeApp(app *gomarathon.Application) *App {
 	tasks := make([]*Task, 0)
 	a := &App{
-		ID: app.ID,
+		ID:     app.ID,
+		Memory: app.Mem,
 	}
 
 	for _, t := range app.Tasks {
@@ -68,9 +70,7 @@ func NewClient() (Client, error) {
 	}
 
 	return &marathonClient{
-		Client:     client,
-		lastResult: nil,
-		lastLookup: 0,
+		Client: client,
 	}, nil
 }
 

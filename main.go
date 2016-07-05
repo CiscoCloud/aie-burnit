@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/MustWin/gomarathon"
 	"github.com/danielkrainas/aie-burnit/marathon"
 	"github.com/danielkrainas/aie-burnit/names"
 	"github.com/danielkrainas/aie-burnit/resources"
@@ -152,7 +151,7 @@ func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
 
 func getStatus(t *marathon.Task) string {
 	if !t.Alive {
-		return getErrorStatus(hostname, "dead", "invalid healthcheck")
+		return getErrorStatus(t.HostAddress, "dead", "invalid healthcheck")
 	}
 
 	resp, err := http.Get(fmt.Sprintf("http://%s/status", t.HostAddress))
@@ -224,7 +223,7 @@ func main() {
 		panic("couldn't get app from marathon")
 	}
 
-	resources.SetMemoryLimit(float64(app.Mem))
+	resources.SetMemoryLimit(float64(app.Memory))
 	http.HandleFunc("/", http.HandlerFunc(defaultHandler))
 	http.HandleFunc("/update", http.HandlerFunc(updateHandler))
 	http.HandleFunc("/update/self", http.HandlerFunc(updateHandler))

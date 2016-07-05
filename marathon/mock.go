@@ -1,30 +1,24 @@
 package marathon
 
-import (
-	"github.com/MustWin/gomarathon"
-)
-
 type mockClient struct{}
 
 func NewMockClient() Client {
 	return &mockClient{}
 }
 
-func (c *mockClient) GetApp(appID string) (*gomarathon.Application, error) {
-	return &gomarathon.Application{
-		ID: appID,
-		Tasks: []*gomarathon.Task{
-			&gomarathon.Task{
-				AppID: appID,
-				Host:  "localhost",
-				Ports: []int{8888},
+func (c *mockClient) GetApp(appID string) (*App, error) {
+	return &App{
+		ID:     appID,
+		Memory: 512.0,
+		Tasks: []*Task{
+			&Task{
+				Alive:       true,
+				HostAddress: "localhost:8888",
 			},
-			&gomarathon.Task{
-				AppID: appID,
-				Host:  "localhost",
-				Ports: []int{8887},
+			&Task{
+				Alive:       true,
+				HostAddress: "localhost:8887",
 			},
 		},
-		Mem: 512.0,
 	}, nil
 }
