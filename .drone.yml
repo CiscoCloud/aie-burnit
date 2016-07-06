@@ -7,10 +7,10 @@ clone:
   path: github.com/danielkrainas/aie-burnit
 build:
   image: dakr/golangnode
-  commands:
-    - npm install
-    - bash -c "grunt build"
-    - bash -c ". ~/.bashrc && .shipped/build"
+  #commands:
+    #- npm install
+    #- bash -c "grunt build"
+    #- bash -c ". ~/.bashrc && .shipped/build"
 publish:
   docker:
     file: ./Dockerfile
