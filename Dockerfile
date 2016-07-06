@@ -1,9 +1,10 @@
-FROM golang:1.5
+FROM golang:1.6-alpine
 EXPOSE 8888
-WORKDIR /go/src/app
-COPY . /go/src/app
 
-RUN chmod a+x .shipped/build .shipped/run .shipped/test
+WORKDIR /app
+COPY assets /app/assets
 
-RUN [".shipped/build"]
-CMD .shipped/run
+COPY .shipped/out /app/aie-burnit
+RUN chmod a+x /app/aie-burnit
+
+CMD /app/aie-burnit

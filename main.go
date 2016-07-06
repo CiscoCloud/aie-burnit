@@ -1,97 +1,236 @@
 package main
 
 import (
-	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"math/rand"
 	"net/http"
+	"net/url"
+	"os"
 	"strconv"
-	"sync"
+	"strings"
 	"time"
+
+	"github.com/danielkrainas/aie-burnit/marathon"
+	"github.com/danielkrainas/aie-burnit/names"
+	"github.com/danielkrainas/aie-burnit/resources"
 )
 
-var nm sync.Mutex
-var N int = 0
-var delta int = 524288 // 512kb
-var alerts = 0
-var mode = "stop"
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
+
+const (
+	LOCAL_APP_ID = "local-app"
+)
+
+var (
+	MARATHON_APP_ID = ""
+	instanceName    = ""
+	alerts          = 0
+	marathonClient  marathon.Client
+)
+
+type updateRequest struct {
+	Resource string `json:"resource,omitempty"`
+	Value    string `json:"value,omitempty"`
+	Action   string `json:"action,omitempty"`
+	Host     string `json:"host,omitempty"`
+}
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
-	nm.Lock()
-	defer nm.Unlock()
-	r.ParseForm()
-
-	action := r.Form.Get("action")
-	fmt.Printf("updating: action=%q\n", action)
-	if action != "" {
-		mode = action
-	} else {
-		memoryStr := r.Form.Get("increment")
-		if memory, err := strconv.ParseFloat(memoryStr, 32); err == nil {
-			delta = int(memory * 1048576.0)
-			fmt.Printf("updating increment to %d\n", delta)
-		} else {
-			fmt.Errorf("error: %s: %v\n", memoryStr, err)
-		}
+	op := &updateRequest{}
+	jd := json.NewDecoder(r.Body)
+	if err := jd.Decode(op); err != nil {
+		fmt.Printf("error decoding update: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 
-	http.Redirect(w, r, "/", 302)
+	value, err := strconv.ParseFloat(op.Value, 32)
+	if err != nil {
+		fmt.Printf("error parsing value: %v\n", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if op.Host == "" || r.URL.Path == "/update/self" {
+		switch op.Resource {
+		case "memory":
+			if op.Action == "reset" {
+				resources.ResetMemoryUsage()
+			} else {
+				resources.SetMemoryUsage(value)
+			}
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	} else {
+		content, err := json.Marshal(op)
+		if err != nil {
+			fmt.Printf("error reencoding update: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		resp, err := http.Post(fmt.Sprintf("http://%s/update/self", op.Host), "application/json", strings.NewReader(string(content)))
+		if err != nil {
+			fmt.Printf("error relaying update: %v\n", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		resp.Body.Close()
+		w.WriteHeader(resp.StatusCode)
+	}
 }
 
 func defaultHandler(w http.ResponseWriter, r *http.Request) {
-	nm.Lock()
-	defer nm.Unlock()
-
 	if r.Method == "POST" {
 		alerts++
 		w.WriteHeader(http.StatusOK)
 	} else {
-		fmt.Fprint(w, `<head></head><body>`)
-		fmt.Fprintf(w, "<h1>hello from burnit: using ~%.2f MB and %d notifications</h1>\n", float32(N)/1048576.0, alerts)
-		fmt.Fprint(w, `<form method="post" action="update">`)
-		fmt.Fprintf(w, `<label>Increment Usage (MB)</label><input type="text" name="increment" value="%.2f" onblur="resume()" onfocus="pause()" />`, float32(delta)/1048576.0)
-		fmt.Fprint(w, `<button type="submit">Update</button><br />`)
-		if mode != "run" && mode != "pause" {
-			fmt.Fprint(w, `<button name="action" type="submit" value="run">Start</button>`)
-		} else if mode == "pause" {
-			fmt.Fprint(w, `<button name="action" type="submit" value="run">Resume</button>`)
-		} else if mode == "run" {
-			fmt.Fprint(w, `<button name="action" type="submit" value="pause">Pause</button>`)
-			fmt.Fprint(w, `<button name="action" type="submit" value="stop">Stop</button>`)
-		}
+		assetHandler(w, r)
+	}
+}
 
-		fmt.Fprint(w, `</form>`)
-		fmt.Fprint(w, `<script>var refreshTimer = null;resume();`)
-		fmt.Fprint(w, `function pause(){ clearTimeout(refreshTimer);refreshTimer = null; }`)
-		fmt.Fprint(w, `function resume(){ refreshTimer = setTimeout(function () { window.location.href = window.location.href; }, 3000) }</script>`)
-		fmt.Fprint(w, `<script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script></body>`)
+func assetHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path == "/style.css" {
+		http.ServeFile(w, r, "./assets/style.css")
+		return
+	} else if r.URL.Path == "/app.js" {
+		http.ServeFile(w, r, "./assets/app.js")
+		return
+	} else if r.URL.Path == "/" {
+		http.ServeFile(w, r, "./assets/index.html")
+		return
+	} else if r.URL.Path == "/cisco-logo-white.png" {
+		http.ServeFile(w, r, "./assets/cisco-logo-white.png")
+		return
+	}
+
+	w.WriteHeader(http.StatusNotFound)
+}
+
+func statusHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, fmt.Sprintf(`{
+		"name": %q,
+		"host": %q,
+		"memory_usage": "%.1f"
+	}`, instanceName, r.Host, resources.GetMemoryUsage()))
+}
+
+func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
+	app, err := marathonClient.GetApp(MARATHON_APP_ID)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		io.WriteString(w, fmt.Sprintf(`{ "errors": [%q] }`, err.Error()))
+		return
+	}
+
+	if app == nil {
+		w.WriteHeader(http.StatusServiceUnavailable)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	results := make([]string, 0)
+	for _, t := range app.Tasks {
+		status := getStatus(t)
+		results = append(results, string(status))
+	}
+
+	w.WriteHeader(http.StatusOK)
+	io.WriteString(w, fmt.Sprintf("[%s]", strings.Join(results, ",")))
+}
+
+func getStatus(t *marathon.Task) string {
+	if !t.Alive {
+		return getErrorStatus(t.HostAddress, "dead", "invalid healthcheck")
+	}
+
+	resp, err := http.Get(fmt.Sprintf("http://%s/status", t.HostAddress))
+	if err != nil {
+		return getErrorStatus(t.HostAddress, "quiet", "could not connect")
+	}
+
+	defer resp.Body.Close()
+	s, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return getErrorStatus(t.HostAddress, "confused", "invalid response")
+	}
+
+	return string(s)
+}
+
+func getErrorStatus(hostname string, status string, message string) string {
+	return fmt.Sprintf(`{"name":"(unknown)", "host":%q, "status":{"name":%q,message:%q}}`, hostname, status, message)
+}
+
+func determineAppId() {
+	instanceName = names.Generate()
+	serviceName := os.Getenv("SERVICE_NAME")
+	if serviceName != "" {
+		fmt.Printf("svc name=%q\n", serviceName)
+		hostVarName := strings.ToUpper(serviceName)
+		hostVarName = "HOST_" + strings.Replace(hostVarName, "-", "_", -1)
+		if os.Getenv(hostVarName) == "" {
+			MARATHON_APP_ID = serviceName
+		} else {
+			u, err := url.Parse(os.Getenv(hostVarName))
+			if err == nil {
+				MARATHON_APP_ID = strings.Split(u.Host, ".")[0]
+			}
+		}
+	} else {
+		fmt.Println("SERVICE_NAME not found")
+	}
+
+	if MARATHON_APP_ID == "" {
+		MARATHON_APP_ID = LOCAL_APP_ID
+	}
+
+	fmt.Printf("app=%s\n", MARATHON_APP_ID)
+}
+
+func setupMarathon() {
+	var err error
+	if os.Getenv("MOCK") != "" {
+		fmt.Println("mocks enabled")
+		marathonClient = marathon.NewMockClient()
+		err = nil
+	} else {
+		marathonClient, err = marathon.NewClient()
+	}
+
+	if err != nil {
+		panic(err)
 	}
 }
 
 func main() {
-	N = 0
-	i := 0
-	blob := make([][]byte, 100000)
-	go func() {
-		for {
-			nm.Lock()
-			if mode == "run" {
-				blob[i] = bytes.Repeat([]byte{70}, delta)
-				i++
-				N += delta
-			} else if mode == "stop" {
-				mode = "pause"
-				blob = make([][]byte, 100000)
-				alerts = 0
-				N = 0
-			}
+	determineAppId()
+	setupMarathon()
+	app, err := marathonClient.GetApp(MARATHON_APP_ID)
+	if err != nil {
+		panic(err)
+	} else if app == nil {
+		panic("couldn't get app from marathon")
+	}
 
-			nm.Unlock()
-			time.Sleep(time.Duration(1) * time.Second)
-		}
-	}()
-
-	http.HandleFunc("/", defaultHandler)
-	http.HandleFunc("/update", updateHandler)
+	resources.SetMemoryLimit(float64(app.Memory))
+	http.HandleFunc("/", http.HandlerFunc(defaultHandler))
+	http.HandleFunc("/update", http.HandlerFunc(updateHandler))
+	http.HandleFunc("/update/self", http.HandlerFunc(updateHandler))
+	http.HandleFunc("/style.css", http.HandlerFunc(assetHandler))
+	http.HandleFunc("/app.js", http.HandlerFunc(assetHandler))
+	http.HandleFunc("/status", http.HandlerFunc(statusHandler))
+	http.HandleFunc("/status/all", http.HandlerFunc(aggregateStatusHandler))
 	fmt.Println("Example app listening at http://localhost:8888")
 	http.ListenAndServe(":8888", nil)
 }

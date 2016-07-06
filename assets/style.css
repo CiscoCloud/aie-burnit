@@ -1,0 +1,21 @@
+html, body {
+	padding-top: 50px;
+}
+
+.navbar.navbar-cisco {
+	background-color: #0097D6;
+}
+
+.navbar-cisco .navbar-brand {
+	color: #ffffff !important;
+}
+
+.navbar-icon {
+	position: absolute;
+	left: 20px;
+	top: 10px;
+}
+
+a[role=button] {
+	cursor: pointer;
+}

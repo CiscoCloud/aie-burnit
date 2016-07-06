@@ -1,18 +1,16 @@
-image: golang:1.5
+image: golang:1.6
 git:
   path: github.com/CiscoCloud/aie-burnit
 script:
-  - echo "build commands"
-  - echo "no build command"
-  - echo "no test command"
+  - echo "notta 1"
 clone:
   path: github.com/CiscoCloud/aie-burnit
 build:
-  image: golang:1.5
+  image: dakr/golangnode
   commands:
-    - echo "build commands"
-    - echo "no build command"
-    - echo "no test command"
+    - npm install
+    - bash -c "grunt build"
+    - bash -c ". ~/.bashrc && .shipped/build"
 publish:
   docker:
     file: ./Dockerfile
