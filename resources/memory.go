@@ -3,6 +3,7 @@ package resources
 import (
 	"bytes"
 	"fmt"
+	"runtime/debug"
 	"sync"
 )
 
@@ -20,6 +21,7 @@ func SetMemoryUsage(value float64) {
 		value = value / 100.0
 	}
 
+	ResetMemoryUsage()
 	memoryMutex.Lock()
 	memoryCount = value * memoryLimit * MEGABYTE
 	fmt.Printf("memory=%.2f bytes(%.1f%%)\n", memoryCount, value*100.0)
@@ -31,6 +33,9 @@ func ResetMemoryUsage() {
 	memoryMutex.Lock()
 	memoryBuffer = []byte{}
 	memoryCount = 0
+	// NOTE: call twice https://github.com/golang/go/issues/8019
+	debug.FreeOSMemory()
+	debug.FreeOSMemory()
 	memoryMutex.Unlock()
 }
 
