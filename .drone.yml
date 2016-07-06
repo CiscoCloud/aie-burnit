@@ -1,13 +1,6 @@
-image: golang:1.6
-git:
-  path: github.com/CiscoCloud/aie-burnit
-script:
-  - echo "notta 1"
-clone:
-  path: github.com/CiscoCloud/aie-burnit
 build:
   image: dakr/golangnode
-  #commands:
+  commands:
     #- npm install
     #- bash -c "grunt build"
     #- bash -c ". ~/.bashrc && .shipped/build"
