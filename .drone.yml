@@ -1,19 +1,17 @@
 image: golang:1.6
 git:
   path: github.com/danielkrainas/aie-burnit
-script:
-  - echo "notta 1"
 clone:
   path: github.com/danielkrainas/aie-burnit
 build:
   image: dakr/golangnode
-  #commands:
-    #- npm install
-    #- bash -c "grunt build"
-    #- bash -c ". ~/.bashrc && .shipped/build"
+  commands:
+    - npm install
+    - bash -c "grunt build"
+    - bash -c ". ~/.bashrc && .shipped/build"
 publish:
   docker:
-    file: ./Dockerfile
+    file: ./Dockerfile.tiny
     insecure: true
     username: $$docker_user
     password: $$docker_key
