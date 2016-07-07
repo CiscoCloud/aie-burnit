@@ -1,9 +1,6 @@
 build:
   image: dakr/golangnode
-  commands:
-    #- npm install
-    #- bash -c "grunt build"
-    #- bash -c ". ~/.bashrc && .shipped/build"
+  commands: null
 publish:
   docker:
     file: ./Dockerfile
@@ -14,4 +11,3 @@ publish:
     repo: $$docker_repo
     email: $$docker_user_email
     tag: $$COMMIT
-    
