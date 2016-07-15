@@ -127,7 +127,7 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		"name": %q,
 		"host": %q,
 		"memory_usage": "%.1f",
-		"disk_usage": "%.1f",
+		"disk_usage": "%d",
 		"status": {
 			"name": "ok",
 			"valid": true

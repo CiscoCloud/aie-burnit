@@ -8,7 +8,7 @@ import { resetDisk, setResource } from '../store/action-creators';
 			<label class="col-md-2 col-md-offset-2">Usage</label>
 			<div class="col-md-4">
 				<div class="input-group">
-					<input type="number" name="usage" min="0" max="100" step="10" value={ opts.usage } class="form-control" required />
+					<input type="number" name="usage" min="1" max="100" step="1" value={ opts.usage } class="form-control" required />
 					<span class="input-group-addon"><strong>MBs</strong></span>
 				</div>
 			</div>
