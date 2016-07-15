@@ -16,6 +16,25 @@ html, body {
 	top: 10px;
 }
 
-a[role=button] {
+a[role=button], div[role=button] {
 	cursor: pointer;
+}
+
+.stats > div {
+	border-right: 1px solid #BBB;
+	font-size: .9em;
+}
+
+.active .stats > div {
+	color: #c7ddef;
+	border-right-color: #c7ddef;
+}
+
+.stats > div:last-child {
+	border-right: 0 !important;
+}
+
+.instance-title {
+	font-weight: bold;
+	font-size: 1em;
 }

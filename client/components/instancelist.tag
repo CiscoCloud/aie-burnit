@@ -3,11 +3,19 @@ import { selectInstance } from '../store/action-creators';
 
 <instancelist>
 	<div class="list-group">
-		<a role="button" each={ instances } onclick={ select } class={ list-group-item: true, active: selected, list-group-item-danger: status.invalid }>
-		<span title="invalid instance" show={ status.invalid }><i class="fa fa-exclamation-triangle"></i></span> { name } 
-			<span hide={ status.invalid } class="badge">RAM { memoryUsage }%</span>
-			<span hide={ status.invalid } class="badge">DISK { diskUsage } MB/sec</span>
-		</a>
+		<div role="button" each={ instances } onclick={ select } class={ list-group-item: true, active: selected, list-group-item-danger: status.invalid }>
+			<h5 class="instance-title"><span title="invalid instance" show={ status.invalid }><i class="fa fa-exclamation-triangle"></i></span> { name }</h5>
+
+			<div class="row stats" hide={ status.invalid }>
+				<div class="col-md-4 text-center">
+					MEM <br />{ memoryUsage }%
+				</div>
+				<div class="col-md-4 text-center">
+					DISK <br />{ diskUsage } MB/sec
+				</div>
+				<div class="col-md-4 text-center"></div>
+			</div>
+		</div>
 	</div>
 
 	<script>

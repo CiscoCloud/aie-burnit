@@ -127,11 +127,12 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 		"name": %q,
 		"host": %q,
 		"memory_usage": "%.1f",
+		"disk_usage": "%.1f",
 		"status": {
 			"name": "ok",
 			"valid": true
 		}
-	}`, instanceName, r.Host, resources.GetMemoryUsage()))
+	}`, instanceName, r.Host, resources.GetMemoryUsage(), resources.GetDiskUsage()))
 }
 
 func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {

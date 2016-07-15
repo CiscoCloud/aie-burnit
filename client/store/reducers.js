@@ -27,8 +27,12 @@ function updateSelection(state) {
 	if (state.selected) {
 		var selected = _.find(state.instances, { name: state.selected.name }) || null;
 		if (!selected) {
-			state.selected.invalid = true;
-			state.selected.memoryUsage = '??';
+			state.selected.status = {
+				invalid: true,
+				name: 'missing',
+				message: 'does not exist'
+			};
+			
 			state.instances.unshift(_.clone(state.selected));
 		} else {
 			selected.selected = true;
