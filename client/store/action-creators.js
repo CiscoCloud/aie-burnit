@@ -26,6 +26,17 @@ export function resetMemory() {
 	};
 }
 
+export function resetDisk() {
+	return {
+		type: RESET_DISK,
+		remote: true,
+		params: {
+			resource: 'disk',
+			value: '0'
+		}
+	};
+}
+
 export function setResource(resource, value) {
 	return {
 		type: SET_RESOURCE,

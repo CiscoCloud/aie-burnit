@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/CiscoCloud/aie-burnit/resources"
 	"github.com/danielkrainas/aie-burnit/marathon"
 	"github.com/danielkrainas/aie-burnit/names"
-	"github.com/danielkrainas/aie-burnit/resources"
 )
 
 func init() {
@@ -63,6 +63,12 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 				resources.ResetMemoryUsage()
 			} else {
 				resources.SetMemoryUsage(value)
+			}
+		case "disk":
+			if op.Action == "reset" {
+				resources.ResetDiskUsage()
+			} else {
+				resources.SetDiskUsage(int64(value))
 			}
 		}
 

@@ -16,6 +16,14 @@ import { nextInstance } from '../store/action-creators';
 		<memorycontrol usage={ instance.memoryUsage }></memorycontrol>
 	</div>
 
+	<div class="clearfix"></div>
+
+	<div hide={ instance.invalid }>
+		<h4><i class="fa fa-braille"></i> Disk</h4>
+		<hr />
+		<diskcontrol usage={ instance.diskUsage }></diskcontrol>
+	</div>
+
 	<script>
 		this.mixin('redux');
 		this.dispatchify({ nextInstance });
