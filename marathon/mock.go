@@ -13,11 +13,11 @@ func (c *mockClient) GetApp(appID string) (*App, error) {
 		Tasks: []*Task{
 			&Task{
 				Alive:       true,
-				HostAddress: "localhost:8888",
+				HostAddress: "localhost:8887",
 			},
 			&Task{
 				Alive:       true,
-				HostAddress: "localhost:8887",
+				HostAddress: "localhost:8888",
 			},
 		},
 	}, nil

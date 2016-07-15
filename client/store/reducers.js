@@ -13,7 +13,6 @@ export default reducer = (state, action) => {
 			state.selected = state.instances[0];
 		} else {
 			var index = _.findIndex(state.instances, { name: state.selected.name });
-			console.log('index ', index);
 			if (index >= 0) {
 				state.selected = state.instances[index+1] || null;
 			}
