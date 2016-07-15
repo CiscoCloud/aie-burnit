@@ -175,7 +175,7 @@ func getStatus(t *marathon.Task) string {
 }
 
 func getErrorStatus(hostname string, status string, message string) string {
-	return fmt.Sprintf(`{"name":"(unknown)", "host":%q, "status":{"name":%q,message:%q}}`, hostname, status, message)
+	return fmt.Sprintf(`{"name":"(unknown)", "host":%q, "status":{"name":%q,"message":%q}}`, hostname, status, message)
 }
 
 func determineAppId() {
