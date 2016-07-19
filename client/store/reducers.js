@@ -13,7 +13,6 @@ export default reducer = (state, action) => {
 			state.selected = state.instances[0];
 		} else {
 			var index = _.findIndex(state.instances, { name: state.selected.name });
-			console.log('index ', index);
 			if (index >= 0) {
 				state.selected = state.instances[index+1] || null;
 			}
@@ -28,8 +27,12 @@ function updateSelection(state) {
 	if (state.selected) {
 		var selected = _.find(state.instances, { name: state.selected.name }) || null;
 		if (!selected) {
-			state.selected.invalid = true;
-			state.selected.memoryUsage = '??';
+			state.selected.status = {
+				invalid: true,
+				name: 'missing',
+				message: 'does not exist'
+			};
+			
 			state.instances.unshift(_.clone(state.selected));
 		} else {
 			selected.selected = true;

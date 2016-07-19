@@ -8,10 +8,12 @@ export function setInstances(instances) {
 		instances: _.sortBy(instances.map(i => {
 			var c = _.cloneDeep(i);
 			c.memoryUsage = c.memory_usage;
+			c.diskUsage = c.disk_usage;
 			c.selected = false;
 			delete c.memory_usage;
+			delete c.disk_usage;
 			return c;
-		}), 'name')
+		}), 'status.name')
 	};
 }
 
@@ -21,6 +23,17 @@ export function resetMemory() {
 		remote: true,
 		params: {
 			resource: 'memory',
+			value: '0'
+		}
+	};
+}
+
+export function resetDisk() {
+	return {
+		type: RESET_DISK,
+		remote: true,
+		params: {
+			resource: 'disk',
 			value: '0'
 		}
 	};

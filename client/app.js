@@ -3,6 +3,7 @@ import reduxMixin from 'riot-redux-mixin';
 
 import './components/instancelist.tag';
 import './components/memorycontrol.tag';
+import './components/diskcontrol.tag';
 import './components/instancecontrols.tag';
 
 import storeFactory from './store';

@@ -13,9 +13,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danielkrainas/aie-burnit/marathon"
-	"github.com/danielkrainas/aie-burnit/names"
-	"github.com/danielkrainas/aie-burnit/resources"
+	"github.com/CiscoCloud/aie-burnit/marathon"
+	"github.com/CiscoCloud/aie-burnit/names"
+	"github.com/CiscoCloud/aie-burnit/resources"
 )
 
 func init() {
@@ -63,6 +63,12 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 				resources.ResetMemoryUsage()
 			} else {
 				resources.SetMemoryUsage(value)
+			}
+		case "disk":
+			if op.Action == "reset" {
+				resources.ResetDiskUsage()
+			} else {
+				resources.SetDiskUsage(int64(value))
 			}
 		}
 
@@ -120,8 +126,13 @@ func statusHandler(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, fmt.Sprintf(`{
 		"name": %q,
 		"host": %q,
-		"memory_usage": "%.1f"
-	}`, instanceName, r.Host, resources.GetMemoryUsage()))
+		"memory_usage": "%.1f",
+		"disk_usage": "%d",
+		"status": {
+			"name": "ok",
+			"valid": true
+		}
+	}`, instanceName, r.Host, resources.GetMemoryUsage(), resources.GetDiskUsage()))
 }
 
 func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
@@ -141,35 +152,39 @@ func aggregateStatusHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	results := make([]string, 0)
 	for _, t := range app.Tasks {
-		status := getStatus(t)
-		results = append(results, string(status))
+		status, ok := getStatus(t)
+		if !ok {
+			results = append(results, status)
+		} else {
+			results = append([]string{status}, results...)
+		}
 	}
 
 	w.WriteHeader(http.StatusOK)
 	io.WriteString(w, fmt.Sprintf("[%s]", strings.Join(results, ",")))
 }
 
-func getStatus(t *marathon.Task) string {
+func getStatus(t *marathon.Task) (string, bool) {
 	if !t.Alive {
-		return getErrorStatus(t.HostAddress, "dead", "invalid healthcheck")
+		return getErrorStatus(t.HostAddress, "dead", "invalid healthcheck"), false
 	}
 
 	resp, err := http.Get(fmt.Sprintf("http://%s/status", t.HostAddress))
 	if err != nil {
-		return getErrorStatus(t.HostAddress, "quiet", "could not connect")
+		return getErrorStatus(t.HostAddress, "quiet", "could not connect"), false
 	}
 
 	defer resp.Body.Close()
 	s, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		return getErrorStatus(t.HostAddress, "confused", "invalid response")
+		return getErrorStatus(t.HostAddress, "confused", "invalid response"), false
 	}
 
-	return string(s)
+	return string(s), true
 }
 
 func getErrorStatus(hostname string, status string, message string) string {
-	return fmt.Sprintf(`{"name":"(unknown)", "host":%q, "status":{"name":%q,message:%q}}`, hostname, status, message)
+	return fmt.Sprintf(`{"name":"(unknown)", "host":%q, "status":{"name":%q,"message":%q,"invalid":true}}`, hostname, status, message)
 }
 
 func determineAppId() {
@@ -231,6 +246,6 @@ func main() {
 	http.HandleFunc("/app.js", http.HandlerFunc(assetHandler))
 	http.HandleFunc("/status", http.HandlerFunc(statusHandler))
 	http.HandleFunc("/status/all", http.HandlerFunc(aggregateStatusHandler))
-	fmt.Println("Example app listening at http://localhost:8888")
+	fmt.Println("aie burnit listening at http://localhost:8888")
 	http.ListenAndServe(":8888", nil)
 }
