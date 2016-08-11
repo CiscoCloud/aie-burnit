@@ -1,10 +1,10 @@
-import { SET_INSTANCES, SET_RESOURCE, SELECT_INSTANCE, RESET_MEMORY, NEXT_INSTANCE } from './states';
+import * as states from './states';
 import _ from 'lodash';
 
 export function setInstances(instances) {
 	instances = instances || [];
 	return {
-		type: SET_INSTANCES,
+		type: states.SET_INSTANCES,
 		instances: _.sortBy(instances.map(i => {
 			var c = _.cloneDeep(i);
 			c.memoryUsage = c.memory_usage;
@@ -19,7 +19,7 @@ export function setInstances(instances) {
 
 export function resetMemory() {
 	return {
-		type: RESET_MEMORY,
+		type: states.RESET_MEMORY,
 		remote: true,
 		params: {
 			resource: 'memory',
@@ -30,7 +30,7 @@ export function resetMemory() {
 
 export function resetDisk() {
 	return {
-		type: RESET_DISK,
+		type: states.RESET_DISK,
 		remote: true,
 		params: {
 			resource: 'disk',
@@ -41,7 +41,7 @@ export function resetDisk() {
 
 export function setResource(resource, value) {
 	return {
-		type: SET_RESOURCE,
+		type: states.SET_RESOURCE,
 		remote: true,
 		params: {
 			resource: resource,
@@ -52,13 +52,54 @@ export function setResource(resource, value) {
 
 export function selectInstance(instance) {
 	return {
-		type: SELECT_INSTANCE,
+		type: states.SELECT_INSTANCE,
 		instance: instance
 	};
 }
 
 export function nextInstance() {
 	return {
-		type: NEXT_INSTANCE
+		type: states.NEXT_INSTANCE
+	};
+}
+
+export function recordTrafficHit(statusCode) {
+	return {
+		type: states.TRAFFIC_HIT,
+		timestamp: Date.now(),
+		statusCode
+	};
+}
+
+export function startTraffic(config) {
+	return {
+		type: states.TRAFFIC_GO,
+		config: _.cloneDeep(config)
+	};
+}
+
+export function trafficStarted(config) {
+	return {
+		type: states.TRAFFIC_STARTED,
+		config: _.cloneDeep(config)
+	}
+}
+
+export function stopTraffic() {
+	return {
+		type: states.TRAFFIC_STOP
+	};
+}
+
+export function trafficDone() {
+	return {
+		type: states.TRAFFIC_DONE
+	};
+}
+
+export function toggleTraffic(enabled) {
+	return {
+		type: states.TRAFFIC_TOGGLE,
+		enabled: enabled
 	};
 }

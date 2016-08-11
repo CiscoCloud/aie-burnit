@@ -1,14 +1,15 @@
 import _ from 'lodash';
 
-import { SET_INSTANCES, SELECT_INSTANCE, NEXT_INSTANCE } from './states';
+import * as states from './states';
 
 export default reducer = (state, action) => {
 	state = _.cloneDeep(state);
-	if (action.type === SET_INSTANCES) {
+
+	if (action.type === states.SET_INSTANCES) {
 		state.instances = action.instances;
-	} else if (action.type === SELECT_INSTANCE) {
+	} else if (action.type === states.SELECT_INSTANCE) {
 		state.selected = action.instance;
-	} else if (action.type === NEXT_INSTANCE) {
+	} else if (action.type === states.NEXT_INSTANCE) {
 		if (!state.selected) {
 			state.selected = state.instances[0];
 		} else {
@@ -17,6 +18,29 @@ export default reducer = (state, action) => {
 				state.selected = state.instances[index+1] || null;
 			}
 		}
+	} else if (action.type === states.TRAFFIC_STARTED) {
+		state.traffic = {
+			enabled: true,
+			active: true,
+			config: action.config,
+			completed: 0,
+			completed_pct: 0.0,
+			hits: []
+		};
+	} else if (action.type === states.TRAFFIC_HIT) {
+		let goal = state.traffic.config.hitCount;
+		let completed = state.traffic.completed + 1;
+		let completed_pct = (goal > 0 ? (completed/goal) : 0.0) * 100.0;
+		let hits = state.traffic.hits.concat([{ statusCode: action.statusCode }]);
+		state.traffic = _.merge(state.traffic, {
+			hits,
+			completed,
+			completed_pct
+		});
+	} else if (action.type === states.TRAFFIC_DONE) {
+		state.traffic.active = false;
+	} else if (action.type === states.TRAFFIC_TOGGLE) {
+		state.traffic.enabled = action.enabled;
 	}
 
 	updateSelection(state);

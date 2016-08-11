@@ -27,10 +27,16 @@ const (
 )
 
 var (
-	MARATHON_APP_ID = ""
-	instanceName    = ""
-	alerts          = 0
-	marathonClient  marathon.Client
+	MARATHON_APP_ID    = ""
+	instanceName       = ""
+	alerts             = 0
+	marathonClient     marathon.Client
+	trafficStatusCodes = []int64{
+		200,
+		300,
+		404,
+		500,
+	}
 )
 
 type updateRequest struct {
@@ -118,6 +124,33 @@ func assetHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNotFound)
+}
+
+func trafficSimulationHandler(w http.ResponseWriter, r *http.Request) {
+	u, err := url.Parse(r.RequestURI)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	vals := u.Query()
+	var delay, status int64
+	if delay, err = strconv.ParseInt(vals.Get("delay"), 10, 64); err != nil {
+		http.Error(w, "invalid delay", http.StatusBadRequest)
+		return
+	} else if delay <= 0 {
+		delay = rand.Int63n(100)
+	}
+
+	if status, err = strconv.ParseInt(vals.Get("status"), 10, 64); err != nil {
+		http.Error(w, "invalid status", http.StatusBadRequest)
+		return
+	} else if status <= 0 {
+		status = trafficStatusCodes[rand.Intn(len(trafficStatusCodes))]
+	}
+
+	time.Sleep(time.Duration(delay) * time.Millisecond)
+	w.WriteHeader(int(status))
 }
 
 func statusHandler(w http.ResponseWriter, r *http.Request) {
@@ -245,6 +278,7 @@ func main() {
 	http.HandleFunc("/style.css", http.HandlerFunc(assetHandler))
 	http.HandleFunc("/app.js", http.HandlerFunc(assetHandler))
 	http.HandleFunc("/status", http.HandlerFunc(statusHandler))
+	http.HandleFunc("/traffic", http.HandlerFunc(trafficSimulationHandler))
 	http.HandleFunc("/status/all", http.HandlerFunc(aggregateStatusHandler))
 	fmt.Println("aie burnit listening at http://localhost:8888")
 	http.ListenAndServe(":8888", nil)

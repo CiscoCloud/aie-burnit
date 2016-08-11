@@ -1,5 +1,3 @@
-import request from 'browser-request';
-import _ from 'lodash';
 import { resetMemory, setResource } from '../store/action-creators';
 
 <memorycontrol>
@@ -25,10 +23,8 @@ import { resetMemory, setResource } from '../store/action-creators';
 		this.mixin('redux');
 		this.dispatchify({ resetMemory, setResource });
 
-		this.sendUpdate = (e) => {
+		this.sendUpdate = () => {
 			this.setResource('memory', this.usage.value);
-			e.preventDefault();
-			return false;
 		};
 	</script>
 </memorycontrol>

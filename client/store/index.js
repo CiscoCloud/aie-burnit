@@ -6,7 +6,19 @@ import * as wares from './middleware';
 
 const defaultState = {
 	instances: [],
-	selected: null
+	selected: null,
+	traffic: {
+		enabled: false,
+		active: false,
+		config: {
+			hitCount: 0,
+			statusCode: 0,
+			delayMs: 0
+		},
+		hits: [],
+		completed: 0,
+		completed_pct: 0.0
+	}
 };
 
 export default function storeFactory(...middlewares) {

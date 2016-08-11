@@ -1,5 +1,3 @@
-import request from 'browser-request';
-import _ from 'lodash';
 import { resetDisk, setResource } from '../store/action-creators';
 
 <diskcontrol>
@@ -24,10 +22,8 @@ import { resetDisk, setResource } from '../store/action-creators';
 		this.mixin('redux');
 		this.dispatchify({ resetDisk, setResource });
 
-		this.sendUpdate = (e) => {
+		this.sendUpdate = () => {
 			this.setResource('disk', this.usage.value);
-			e.preventDefault();
-			return false;
 		};
 	</script>
 </diskcontrol>
